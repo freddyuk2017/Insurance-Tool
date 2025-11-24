@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>私人財富保障組合報告 | Private Wealth</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+<style>
+  /* ==================== 1. 核心設定 ==================== */
+  :root {
+    --bg: #f0f2f5; --card-bg: #ffffff;
+    --text-main: #1f2937; --text-light: #6b7280;
+    --primary: #0f172a; --accent: #3b82f6; --warm-accent: #f59e0b;
+    --border: #e5e7eb; --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    --font-stack: 'Noto Sans TC', 'Inter', sans-serif;
+  }
+  * { box-sizing: border-box; outline: none; }
+  body { margin: 0; padding: 0; background: var(--bg); font-family: var(--font-stack); color: var(--text-main); -webkit-font-smoothing: antialiased; }
+
+  /* ==================== 2. 螢幕介面 ==================== */
+  .screen-view { max-width: 1100px; margin: 30px auto; padding: 0 24px 60px; display: grid; gap: 24px; }
+  .card { background: var(--card-bg); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); border: 1px solid #fff; }
+  
+  /* Header */
+  .header-card { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+  .app-title { font-size: 26px; font-weight: 700; color: var(--primary); margin: 0; letter-spacing: -0.5px; }
+  .app-subtitle { font-size: 12px; color: var(--text-light); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  
+  .action-bar { display: flex; gap: 8px; }
+  .btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; color: var(--text-main); }
+  .btn:hover { background: #f9fafb; border-color: #d1d5db; }
+  .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn-primary:hover { background: #1e293b; box-shadow: 0 4px 12px rgba(15,23,42,0.2); }
+  .btn-ghost { border-color: transparent; background: transparent; color: var(--text-light); }
+  .btn-ghost:hover { background: #f3f4f6; color: var(--primary); }
+
+  /* Client Info */
+  .client-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+  .meta-item { overflow: hidden; }
+  .meta-label { font-size: 11px; color: var(--text-light); font-weight: 600; margin-bottom: 4px; }
+  .meta-value { font-size: 15px; font-weight: 500; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Metrics */
+  .metrics-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .metric-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .metric-title { font-size: 12px; color: var(--text-light); margin-bottom: 5px; }
+  .metric-num { font-size: 24px; font-weight: 700; color: var(--primary); font-family: 'Inter', sans-serif; }
+
+  /* Table */
+  .table-card { overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 15px; font-size: 13px; background: #f9fafb; color: var(--text-light); font-weight: 600; }
+  td { padding: 15px; font-size: 14px; border-bottom: 1px solid #f3f4f6; }
+  tr:hover { background: #f8fafc; }
+  
+  .tag { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+  .tag-life { background: #eff6ff; color: #1d4ed8; }
+  .tag-ci { background: #fdf2f8; color: #be185d; }
+  .tag-med { background: #f5f3ff; color: #7c3aed; }
+  .tag-acc { background: #fff7ed; color: #c2410c; }
+  .tag-sav { background: #f0fdf4; color: #15803d; }
+
+  /* Analysis Grid */
+  .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .chart-box { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; }
+  .diagnosis-box { display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto; }
+  .gap-alert { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 6px; display: flex; gap: 12px; align-items: flex-start; }
+  .gap-title { font-weight: 700; color: #92400e; font-size: 14px; }
+  .gap-desc { font-size: 12px; color: #b45309; margin-top: 2px; }
+
+  /* Modals */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 50; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: #fff; width: 500px; border-radius: 16px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: scale(0.95); transition: 0.2s; }
+  .modal-overlay.open .modal-box { transform: scale(1); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #4b5563; }
+  .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+  .btn-icon { padding: 6px; border: none; background: transparent; cursor: pointer; color: var(--text-light); border-radius: 50%; }
+  .btn-icon:hover { background: #f3f4f6; color: var(--accent); }
+
+  /* ==================== 3. 列印版 (Print View) ==================== */
+  #print-area { display: none; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 12mm; }
+    .screen-view, .modal-overlay { display: none !important; }
+    #print-area { display: block !important; }
+    body { background: #fff; color: #1f2937; font-family: "Noto Sans TC", sans-serif; -webkit-print-color-adjust: exact; }
+
+    .p-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #f59e0b; padding-bottom: 15px; margin-bottom: 25px; }
+    .p-title { font-size: 22px; font-weight: 700; color: #1e3a8a; letter-spacing: 1px; }
+    .p-sub { font-size: 10px; color: #d97706; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
+    .p-meta { text-align: right; font-size: 10px; line-height: 1.6; color: #4b5563; }
+    
+    .p-table-container { margin-bottom: 30px; }
+    .p-section-title { font-size: 12px; font-weight: 700; color: #1e3a8a; margin-bottom: 10px; border-left: 4px solid #f59e0b; padding-left: 8px; }
+    
+    .p-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+    .p-table th { background-color: #fff7ed !important; color: #9a3412; font-weight: 700; text-align: left; padding: 8px 6px; border-bottom: 1px solid #fed7aa; }
+    .p-table td { border-bottom: 1px solid #f3f4f6; padding: 10px 6px; vertical-align: middle; color: #374151; }
+    .p-table tr:last-child td { border-bottom: 2px solid #f59e0b; }
+
+    .p-sos-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-top: 4px solid #1e3a8a; border-radius: 8px; padding: 15px 20px; display: flex; gap: 20px; align-items: center; margin-top: 20px; }
+    .p-sos-icon { font-size: 32px; color: #f59e0b; padding-right: 20px; border-right: 1px solid #cbd5e1; display: flex; align-items: center; }
+    .p-sos-content { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px; }
+    .p-sos-item label { display: block; font-size: 8px; color: #64748b; font-weight: 600; margin-bottom: 2px; text-transform: uppercase; }
+    .p-sos-item div { font-size: 11px; font-weight: 700; color: #0f172a; }
+
+    .p-footer { position: fixed; bottom: 0; left: 0; right: 0; font-size: 8px; color: #9ca3af; padding-top: 10px; border-top: 1px solid #f3f4f6; text-align: justify; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 螢幕操作區 -->
+<div class="screen-view">
+  
+  <!-- Header & Tools -->
+  <div class="header-card">
+    <div>
+      <h1 class="app-title">私人財富保障組合報告</h1>
+      <div class="app-subtitle">Private Wealth Protection Portfolio</div>
+    </div>
+    <div class="action-bar">
+      <!-- 數據管理按鈕 -->
+      <button class="btn btn-ghost" onclick="app.loadDummyData()" title="載入演示數據">
+        <span class="material-icons-outlined">smart_toy</span> Demo
+      </button>
+      <button class="btn btn-ghost" onclick="app.exportJSON()" title="備份資料">
+        <span class="material-icons-outlined">download</span> 備份
+      </button>
+      <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()" title="匯入資料">
+        <span class="material-icons-outlined">upload</span> 還原
+      </button>
+      <input type="file" id="fileInput" hidden onchange="app.importJSON(this)">
+      
+      <!-- 主要操作按鈕 -->
+      <button class="btn" onclick="app.openClientModal()"><span class="material-icons-outlined">edit</span> 編輯資料</button>
+      <button class="btn btn-primary" onclick="app.printReport()"><span class="material-icons-outlined">print</span> 列印報告</button>
+    </div>
+  </div>
+
+  <!-- 客戶資料 (Web Ready: 加回 Email) -->
+  <div class="client-bar">
+    <div class="meta-item"><div class="meta-label">客戶姓名</div><div class="meta-value" id="disp-name">--</div></div>
+    <div class="meta-item"><div class="meta-label">客戶編號</div><div class="meta-value" id="disp-id">--</div></div>
+    <div class="meta-item"><div class="meta-label">聯絡電話</div><div class="meta-value" id="disp-phone">--</div></div>
+    <div class="meta-item"><div class="meta-label">電子郵件</div><div class="meta-value" id="disp-email">--</div></div>
+    <div class="meta-item" style="grid-column: span 2"><div class="meta-label">家庭備註</div><div class="meta-value" id="disp-note">--</div></div>
+  </div>
+
+  <!-- 數據摘要 -->
+  <div class="metrics-bar">
+    <div class="metric-card"><div class="metric-title">有效保單數量</div><div class="metric-num" id="m-count">0</div></div>
+    <div class="metric-card"><div class="metric-title">總保障額度 (HKD)</div><div class="metric-num" id="m-sum" style="color:var(--accent)">0</div></div>
+    <div class="metric-card"><div class="metric-title">年繳保費總額 (HKD)</div><div class="metric-num" id="m-prem">0</div></div>
+    <div class="metric-card"><div class="metric-title">下次繳費日期</div><div class="metric-num" id="m-next" style="color:var(--warm-accent); font-size:20px">--</div></div>
+  </div>
+
+  <!-- 保單列表 -->
+  <div class="card table-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+      <h3 style="margin:0; font-size:18px; color:var(--primary)">保單資產列表</h3>
+      <button class="btn btn-primary" onclick="app.openPolicyModal()">+ 新增保單</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>類別</th><th>保險公司 / 計劃名稱</th><th>保單編號</th><th>受保人 / 受益人</th><th style="text-align:right">保額 (HKD)</th><th style="text-align:right">保費 / 方式</th><th>下次繳費</th><th style="width:60px"></th></tr></thead>
+        <tbody id="screen-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 分析圖表 -->
+  <div class="analysis-grid">
+    <div class="card chart-box">
+      <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:10px;">
+        <h3 style="margin:0; font-size:16px">保障結構分析</h3>
+        <button class="btn" style="padding:4px 8px; font-size:11px" onclick="app.openNeedsModal()">設定目標</button>
+      </div>
+      <svg id="radarSvg" width="260" height="260" viewBox="0 0 260 260"></svg>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 15px 0; font-size:16px">顧問診斷摘要</h3>
+      <div class="diagnosis-box" id="gap-container"></div>
+    </div>
+  </div>
+  
+  <!-- 緊急重置 -->
+  <div style="text-align:center; margin-top:30px">
+    <a href="#" onclick="app.resetSystem()" style="color:#ccc; font-size:11px; text-decoration:none">清除所有數據 (Factory Reset)</a>
+  </div>
+</div>
+
+<!-- 列印區 -->
+<div id="print-area">
+  <header class="p-header">
+    <div><div class="p-title">私人財富保障組合報告</div><div class="p-sub">Private Wealth Protection Portfolio</div></div>
+    <div class="p-meta">
+      <div><strong>客戶姓名：</strong> <span class="pr-name">--</span></div>
+      <div><strong>客戶編號：</strong> <span class="pr-id">--</span></div>
+      <div><strong>報告日期：</strong> <span class="pr-date">--</span></div>
+    </div>
+  </header>
+  <div class="p-table-container">
+    <div class="p-section-title">有效保單資產列表 (Schedule of In-Force Policies)</div>
+    <table class="p-table">
+      <thead><tr><th width="10%">類別</th><th width="25%">保險公司 / 計劃名稱</th><th width="15%">保單編號</th><th width="15%">受益人</th><th width="12%" style="text-align:right">目前保額</th><th width="12%" style="text-align:right">保費</th><th width="11%" style="text-align:right">下次繳費</th></tr></thead>
+      <tbody id="print-tbody"></tbody>
+    </table>
+  </div>
+  <div class="p-section-title">緊急支援與服務承諾 (Emergency & Service)</div>
+  <div class="p-sos-card">
+    <div class="p-sos-icon"><span class="material-icons-outlined">support_agent</span></div>
+    <div class="p-sos-content">
+      <div class="p-sos-item"><label>專屬理財顧問</label><div><span class="pr-agent">--</span> <span class="pr-agent-phone" style="font-weight:400; margin-left:5px">--</span></div></div>
+      <div class="p-sos-item"><label>24小時理賠熱線</label><div class="pr-hotline">--</div></div>
+      <div class="p-sos-item"><label>住院級別權益</label><div class="pr-room">--</div></div>
+      <div class="p-sos-item"><label>入院提示</label><div style="font-weight:400">入院請出示身份證及醫療卡。如需進行手術，請先通知顧問申請預批。</div></div>
+    </div>
+  </div>
+  <footer class="p-footer"><strong>免責聲明：</strong> 本文件由持牌理財顧問編制，僅供客戶行政參考及整合紀錄之用，並非保險公司發出之正式文件。所有保單價值、條款及細則，均以保險公司發出之正式合約為準。本摘要僅包含客觀資料，不包含任何產品建議或財務分析。</footer>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal-box">
+    <h3 style="margin-top:0; color:var(--primary)">編輯客戶資料</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>客戶姓名</label><input id="inp-name"></div>
+      <div class="form-group"><label>客戶 ID</label><input id="inp-id"></div>
+      <div class="form-group"><label>電話</label><input id="inp-phone"></div>
+      <div class="form-group"><label>Email</label><input id="inp-email"></div>
+      <div class="form-group"><label>顧問姓名</label><input id="inp-agent"></div>
+      <div class="form-group"><label>顧問電話</label><input id="inp-agent-phone"></div>
+      <div class="form-group"><label>住院級別</label><select id="inp-room"><option value="普通病房">普通病房</option><option value="半私家房">半私家房</option><option value="私家房">私家房</option></select></div>
+      <div class="form-group"><label>備註</label><input id="inp-note"></div>
+    </div>
+    <div style="text-align:right; margin-top:20px"><button class="btn" onclick="app.closeM('modal-client')">取消</button><button class="btn btn-primary" onclick="app.saveClient()">儲存</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-policy">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; margin-bottom:15px"><h3 style="margin:0" id="p-modal-title">新增保單</h3><button class="btn" onclick="app.deletePolicy()" id="btn-del" style="color:red; border-color:red; display:none">刪除</button></div>
+    <input type="hidden" id="p-id">
+    <div class="form-grid">
+      <div class="form-group"><label>類別</label><select id="p-type"><option value="life">人壽保險</option><option value="ci">危疾保險</option><option value="med">醫療保險</option><option value="acc">意外保險</option><option value="sav">儲蓄保險</option></select></div>
+      <div class="form-group"><label>保險公司</label><input id="p-comp" placeholder="e.g. AIA"></div>
+      <div class="form-group" style="grid-column:span 2"><label>計劃名稱</label><input id="p-plan"></div>
+      <div class="form-group"><label>保單編號</label><input id="p-no"></div>
+      <div class="form-group"><label>受益人</label><input id="p-ben"></div>
+      <div class="form-group"><label>保額 (HKD)</label><input type="number" id="p-sum" value="0"></div>
+      <div class="form-group"><label>保費 (HKD)</label><input type="number" id="p-prem" value="0"></div>
+      <div class="form-group"><label>繳費方式</label><input id="p-method"></div>
+      <div class="form-group"><label>下次繳費</label><input type="date" id="p-next"></div>
+    </div>
+    <div style="text-align:right; margin-top:20px"><button class="btn" onclick="app.closeM('modal-policy')">取消</button><button class="btn btn-primary" onclick="app.savePolicy()">儲存</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-needs">
+  <div class="modal-box">
+    <h3 style="margin-top:0">設定保障目標</h3>
+    <div class="form-group"><label>人壽目標</label><input type="number" id="n-life"></div>
+    <div class="form-group"><label>危疾目標</label><input type="number" id="n-ci"></div>
+    <div class="form-group"><label>意外目標</label><input type="number" id="n-acc"></div>
+    <div class="form-group"><label>儲蓄目標</label><input type="number" id="n-sav"></div>
+    <div style="text-align:right; margin-top:20px"><button class="btn" onclick="app.closeM('modal-needs')">取消</button><button class="btn btn-primary" onclick="app.saveNeeds()">儲存</button></div>
+  </div>
+</div>
+
+<script>
+const app = {
+  data: {
+    client: { name:'陳大文', id:'C-001', phone:'--', email:'--', note:'--', agent:'--', agentPhone:'--', room:'普通病房' },
+    policies: [],
+    needs: { life:8000000, ci:2000000, acc:2000000, sav:1000000 }
+  },
+  
+  dummyData: {
+    client: { name:'陳大文 (Demo)', id:'VIP-888', phone:'9876 5432', email:'david.chan@demo.com', note:'一家四口，經濟支柱，目標55歲退休', agent:'王小明 (經理)', agentPhone:'9123 4567', room:'半私家房 (Semi-Private)' },
+    policies: [
+      { id:1, type:'life', comp:'AIA', plan:'充裕未來 (特級保障)', no:'P8829102', ben:'配偶 100%', sum:8000000, prem:35000, method:'Visa', next:'2025-06-01' },
+      { id:2, type:'ci', comp:'Prudential', plan:'危疾加倍保 (CIE)', no:'C1992231', ben:'--', sum:1500000, prem:22000, method:'Autopay', next:'2025-04-15' },
+      { id:3, type:'med', comp:'Bupa', plan:'Hero VHIS (尊尚)', no:'H55123', ben:'--', sum:0, prem:18000, method:'Amex', next:'2025-01-01' },
+      { id:4, type:'sav', comp:'Manulife', plan:'赤霞珠年金計劃', no:'M77182', ben:'兒子 100%', sum:2000000, prem:50000, method:'Cheque', next:'2025-12-01' },
+      { id:5, type:'acc', comp:'AIA', plan:'意外死傷保障', no:'A99123', ben:'配偶', sum:1000000, prem:2500, method:'Visa', next:'2025-06-01' }
+    ],
+    needs: { life:10000000, ci:3000000, acc:2000000, sav:5000000 }
+  },
+
+  hotlines: { 'AIA':'2232-8888', 'Prudential':'2281-1333', 'Manulife':'2108-1188', 'Bupa':'2517-5333', 'AXA':'2802-2812', 'FWD':'3123-3123' },
+
+  init() {
+    const s = localStorage.getItem('pwp_data_v3_5');
+    if(s) {
+      try{ 
+        const d = JSON.parse(s);
+        // Basic Integrity Check
+        if(d.client && Array.isArray(d.policies)) this.data = d;
+      } catch(e){ console.error("Data corrupted"); }
+    }
+    // Fix: Ensure client object has all keys to prevent null errors
+    if(!this.data.client.email) this.data.client.email = '--';
+    
+    this.render();
+  },
+
+  save() { localStorage.setItem('pwp_data_v3_5', JSON.stringify(this.data)); },
+  
+  resetSystem() {
+    if(confirm("確定清除所有資料並重置？")) {
+      localStorage.removeItem('pwp_data_v3_5');
+      location.reload();
+    }
+  },
+
+  // --- Import / Export / Demo ---
+  loadDummyData() {
+    if(confirm("載入 Demo 數據？現有資料將被覆蓋。")) {
+      this.data = JSON.parse(JSON.stringify(this.dummyData)); // Deep copy
+      this.render();
+    }
+  },
+  exportJSON() {
+    const str = JSON.stringify(this.data, null, 2);
+    const blob = new Blob([str], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Portfolio_${this.data.client.name}_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  },
+  importJSON(input) {
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        if(json.client && Array.isArray(json.policies)) {
+          this.data = json;
+          this.render();
+          alert("資料還原成功！");
+        } else { alert("檔案格式錯誤"); }
+      } catch(err) { alert("無法讀取檔案"); }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  },
+
+  // --- Rendering ---
+  render() {
+    this.renderClient();
+    this.renderTable();
+    this.renderAnalysis();
+    this.save();
+  },
+
+  renderClient() {
+    const c = this.data.client;
+    // KEY FIX: Check if element exists before setting innerText to prevent crash
+    ['name','id','phone','email','note'].forEach(k => {
+        const el = document.getElementById('disp-'+k);
+        if(el) el.innerText = c[k] || '--';
+    });
+    
+    document.querySelectorAll('.pr-name').forEach(e=>e.innerText=c.name);
+    document.querySelectorAll('.pr-id').forEach(e=>e.innerText=c.id);
+    document.querySelectorAll('.pr-date').forEach(e=>e.innerText=new Date().toLocaleDateString());
+    document.querySelectorAll('.pr-agent').forEach(e=>e.innerText=c.agent);
+    document.querySelectorAll('.pr-agent-phone').forEach(e=>e.innerText=c.agentPhone);
+    document.querySelectorAll('.pr-room').forEach(e=>e.innerText=c.room);
+
+    const comps = [...new Set(this.data.policies.map(p=>p.comp || ''))];
+    const lines = comps.map(co => {
+      const k = Object.keys(this.hotlines).find(key=>co.toLowerCase().includes(key.toLowerCase()));
+      return k ? `${k}: ${this.hotlines[k]}` : null;
+    }).filter(Boolean);
+    document.querySelector('.pr-hotline').innerText = lines.length ? lines.join(' / ') : '請聯絡顧問查詢';
+  },
+
+  renderTable() {
+    const sBody = document.getElementById('screen-tbody');
+    const pBody = document.getElementById('print-tbody');
+    sBody.innerHTML = ''; pBody.innerHTML = '';
+    let tSum=0, tPrem=0, nextD=null;
+    const types = { life:['人壽','tag-life'], ci:['危疾','tag-ci'], med:['醫療','tag-med'], acc:['意外','tag-acc'], sav:['儲蓄','tag-sav'] };
+
+    this.data.policies.sort((a,b)=>(a.next||'').localeCompare(b.next||'')).forEach(p => {
+      tSum += (p.type!=='med' ? (Number(p.sum)||0) : 0); 
+      tPrem += (Number(p.prem)||0);
+      if(p.next){ const d=new Date(p.next); const n=new Date(); if(d>n && (!nextD||d<nextD)) nextD=d; }
+      
+      const tName = types[p.type] ? types[p.type][0] : '其他';
+      const tClass = types[p.type] ? types[p.type][1] : '';
+
+      sBody.innerHTML += `<tr>
+        <td><span class="tag ${tClass}">${tName}</span></td>
+        <td><b>${p.comp}</b><br><span style="color:#999;font-size:12px">${p.plan}</span></td>
+        <td>${p.no}</td>
+        <td>${p.client||this.data.client.name}<br><span style="color:#999;font-size:11px">受益: ${p.ben}</span></td>
+        <td align="right">${(Number(p.sum)||0).toLocaleString()}</td>
+        <td align="right">${(Number(p.prem)||0).toLocaleString()}<br><span style="color:#999;font-size:11px">${p.method}</span></td>
+        <td>${p.next}</td>
+        <td align="right"><button class="btn-icon" onclick="app.editP(${p.id})"><span class="material-icons-outlined">edit</span></button></td>
+      </tr>`;
+
+      pBody.innerHTML += `<tr>
+        <td>${tName}</td>
+        <td><b>${p.comp}</b><br>${p.plan}</td>
+        <td>${p.no}</td>
+        <td>${p.ben}</td>
+        <td align="right">${(Number(p.sum)||0).toLocaleString()}</td>
+        <td align="right">${(Number(p.prem)||0).toLocaleString()}</td>
+        <td align="right">${p.next}</td>
+      </tr>`;
+    });
+
+    document.getElementById('m-count').innerText = this.data.policies.length;
+    document.getElementById('m-sum').innerText = tSum.toLocaleString();
+    document.getElementById('m-prem').innerText = tPrem.toLocaleString();
+    document.getElementById('m-next').innerText = nextD ? nextD.toLocaleDateString() : '--';
+  },
+
+  renderAnalysis() {
+    const cats={life:0,ci:0,acc:0,sav:0};
+    this.data.policies.forEach(p=>{ if(cats[p.type]!==undefined) cats[p.type]+=(Number(p.sum)||0); });
+    const needs=this.data.needs;
+    
+    const keys=['life','ci','acc','sav'], cx=130, cy=130, r=80;
+    const vals=keys.map(k=>Math.min(1, cats[k]/(needs[k]||1)));
+    let poly="", axis="";
+    vals.forEach((v,i)=>{
+      const a = Math.PI/2 + 2*Math.PI*i/4;
+      const x=cx+r*Math.cos(a), y=cy-r*Math.sin(a);
+      axis+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e5e7eb"/>`;
+      poly+=`${cx+r*v*Math.cos(a)},${cy-r*v*Math.sin(a)} `;
+    });
+    let grid=""; [0.5,1].forEach(s=>{
+      let pts=""; for(let i=0;i<4;i++){
+        const a=Math.PI/2 + 2*Math.PI*i/4; pts+=`${cx+r*s*Math.cos(a)},${cy-r*s*Math.sin(a)} `;
+      }
+      grid+=`<polygon points="${pts}" fill="none" stroke="#e5e7eb"/>`;
+    });
+    document.getElementById('radarSvg').innerHTML = `${grid}${axis}<polygon points="${poly}" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="2"/>`;
+
+    const box = document.getElementById('gap-container'); box.innerHTML='';
+    const labels=['人壽','危疾','意外','儲蓄'];
+    keys.forEach((k,i)=>{
+      if(cats[k]<needs[k]){
+        const diff=needs[k]-cats[k], pct=Math.round(diff/needs[k]*100);
+        box.innerHTML+=`<div class="gap-alert">
+          <span class="material-icons-outlined" style="color:#f59e0b">warning</span>
+          <div><div class="gap-title">${labels[i]}保障不足 (${pct}%)</div><div class="gap-desc">缺口金額: HKD ${diff.toLocaleString()}</div></div>
+        </div>`;
+      }
+    });
+    if(!box.innerHTML) box.innerHTML='<div style="text-align:center;color:green;padding:20px">恭喜！保障已達標</div>';
+  },
+
+  openClientModal(){ 
+    const c=this.data.client;
+    ['name','id','phone','email','agent','agent-phone','room','note'].forEach(k=>document.getElementById('inp-'+k).value=c[k]||'');
+    this.openM('modal-client');
+  },
+  saveClient(){
+    const c={}; ['name','id','phone','email','agent','agent-phone','room','note'].forEach(k=>c[k]=document.getElementById('inp-'+k).value);
+    this.data.client=c; this.closeM('modal-client'); this.render();
+  },
+
+  openPolicyModal(){ 
+    ['id','comp','plan','no','ben','method','next'].forEach(k=>document.getElementById('p-'+k).value='');
+    ['sum','prem'].forEach(k=>document.getElementById('p-'+k).value=0);
+    document.getElementById('p-modal-title').innerText="新增保單"; 
+    document.getElementById('btn-del').style.display='none';
+    this.openM('modal-policy');
+  },
+  editP(id){
+    const p=this.data.policies.find(x=>x.id===id);
+    if(!p) return;
+    ['type','comp','plan','no','ben','sum','prem','method','next'].forEach(k=>document.getElementById('p-'+k).value=p[k]||'');
+    document.getElementById('p-id').value = p.id;
+    document.getElementById('p-modal-title').innerText="編輯保單"; 
+    document.getElementById('btn-del').style.display='inline-block';
+    this.openM('modal-policy');
+  },
+  savePolicy(){
+    try {
+      const idVal = document.getElementById('p-id').value;
+      const p = {
+        id: idVal ? parseInt(idVal) : Date.now(),
+        type: document.getElementById('p-type').value,
+        comp: document.getElementById('p-comp').value || '',
+        plan: document.getElementById('p-plan').value || '',
+        no: document.getElementById('p-no').value || '',
+        ben: document.getElementById('p-ben').value || '',
+        sum: Number(document.getElementById('p-sum').value) || 0,
+        prem: Number(document.getElementById('p-prem').value) || 0,
+        method: document.getElementById('p-method').value || '',
+        next: document.getElementById('p-next').value || ''
+      };
+      
+      if(idVal) {
+        const i = this.data.policies.findIndex(x => x.id == idVal);
+        if(i !== -1) this.data.policies[i] = p;
+      } else {
+        this.data.policies.push(p);
+      }
+      this.closeM('modal-policy'); 
+      this.render();
+    } catch (e) {
+      alert("儲存失敗: " + e.message);
+    }
+  },
+  deletePolicy(){
+    const id=document.getElementById('p-id').value;
+    if(confirm('刪除?')){ this.data.policies=this.data.policies.filter(x=>x.id!=id); this.closeM('modal-policy'); this.render(); }
+  },
+  
+  openNeedsModal(){
+    const n=this.data.needs; ['life','ci','acc','sav'].forEach(k=>document.getElementById('n-'+k).value=n[k]);
+    this.openM('modal-needs');
+  },
+  saveNeeds(){
+    const n={}; ['life','ci','acc','sav'].forEach(k=>n[k]=Number(document.getElementById('n-'+k).value));
+    this.data.needs=n; this.closeM('modal-needs'); this.render();
+  },
+  
+  openM(id){ document.getElementById(id).classList.add('open'); },
+  closeM(id){ document.getElementById(id).classList.remove('open'); },
+  printReport(){ window.print(); }
+};
+
+app.init();
+</script>
+</body>
+</html>
